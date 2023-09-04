@@ -3,8 +3,6 @@ import requests
 import pandas as pd
 from datetime import datetime, timedelta
 
-st.set_page_config('MF Momentum Strategy',None,layout='wide')
-
 # Define the API URL for mutual fund schemes
 schemes_api_url = "https://api.mfapi.in/mf"
 
@@ -21,19 +19,24 @@ if response.status_code == 200:
 else:
     st.error("Error fetching mutual fund data from the API.")
 
-# Initialize session_state to store selected mutual funds
+# Initialize session_state to store selected mutual funds and filter keyword
 if 'selected_funds' not in st.session_state:
     st.session_state.selected_funds = []
+if 'filter_keyword' not in st.session_state:
+    st.session_state.filter_keyword = ""
 
 # Streamlit UI
-st.title("Mutual Fund - Momentum Strategy")
+st.title("Mutual Fund Analyzer")
 
 # Clear existing selected funds
 if st.button("Clear Selected Funds"):
     st.session_state.selected_funds = []
 
-# Select mutual funds and add them to the special list
-selected_funds = st.multiselect("Select Mutual Funds", df_mutual_funds['schemeName'])
+# Filter funds by keyword
+st.session_state.filter_keyword = st.text_input("Filter Funds by Keyword")
+
+# Select mutual funds based on the filter keyword and add them to the special list
+selected_funds = st.multiselect("Select Mutual Funds", df_mutual_funds[df_mutual_funds['schemeName'].str.contains(st.session_state.filter_keyword, case=False)]['schemeName'])
 
 if st.button("Add Selected Funds"):
     if selected_funds:
@@ -94,14 +97,4 @@ if st.button("Fetch NAV Data"):
     
     # Display NAV data in descending order of percentage change
     df_nav_data_sorted = df_nav_data.sort_values(by='Percentage Change', ascending=False)
-    st.dataframe(df_nav_data_sorted,width=1000,height=1000)
-
-#this is the css code to hide main menu button, stream logo at the bottom, top header colored ribbon
-hide_st_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
-            header {visibility: hidden;}
-            </style>
-            """
-st.markdown(hide_st_style, unsafe_allow_html=True)
+    st.dataframe(df_nav_data_sorted)
