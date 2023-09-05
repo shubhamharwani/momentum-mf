@@ -12,6 +12,8 @@ nav_api_url = "https://api.mfapi.in/mf/"
 # Fetch the list of mutual funds and organize it into a DataFrame
 response = requests.get(schemes_api_url)
 
+st.set_page_config('Momentum MF Screener',':zap:',layout='wide')
+
 if response.status_code == 200:
     mutual_funds_data = response.json()
     df_mutual_funds = pd.DataFrame(mutual_funds_data)
